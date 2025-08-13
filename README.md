@@ -8,6 +8,7 @@ yung mga pictures ilagay nyo sa assets/images
 para ma call out nyo yung images 
 example: assets/images/lettuce.jpg
 
+yung veggielibrary nasa lib folder
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
