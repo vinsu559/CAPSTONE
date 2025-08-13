@@ -53,10 +53,14 @@ class _VeggieLibraryScreenState extends State<VeggieLibraryScreen> {
     List<Veggie> filteredVeggies =
         _allVeggies
             .where(
-              (veggie) =>
-                  veggie.name.toLowerCase().contains(_searchText.toLowerCase()),
+              (veggie) => veggie.name.toLowerCase().startsWith(
+                _searchText.toLowerCase(),
+              ),
             )
-            .toList();
+            .toList()
+          ..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Veggie Library'), centerTitle: true),

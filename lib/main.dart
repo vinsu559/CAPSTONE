@@ -42,9 +42,31 @@ class DeviceGate extends StatefulWidget {
 class _DeviceGateState extends State<DeviceGate> {
   final _controller = TextEditingController();
 
-  Future<void> _saveDeviceId() async {
+  Future<void> _validateAndSaveDeviceId() async {
     final id = _controller.text.trim();
-    if (id.isNotEmpty) {
+    if (id.isEmpty) return;
+
+    final ref = FirebaseDatabase.instance.ref('sensors/$id');
+    final snapshot = await ref.get();
+
+    if (!snapshot.exists) {
+      // Show Invalid Code
+      showDialog(
+        context: context,
+        builder:
+            (_) => AlertDialog(
+              title: const Text("Invalid code"),
+              content: const Text("The device ID you entered does not exist."),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+      );
+    } else {
+      // Save & Navigate
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('device_id', id);
       Navigator.of(context).pushReplacement(
@@ -83,6 +105,25 @@ class _DeviceGateState extends State<DeviceGate> {
                 ),
               ),
               const SizedBox(height: 10),
+
+              // Input Field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Device ID (e.g. plant_001)',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              // Connect Button
               SizedBox(
                 width: 150,
                 child: ElevatedButton(
@@ -93,28 +134,8 @@ class _DeviceGateState extends State<DeviceGate> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder:
-                          (_) => AlertDialog(
-                            title: const Text('Enter Device Code'),
-                            content: TextField(
-                              controller: _controller,
-                              decoration: const InputDecoration(
-                                labelText: 'Device ID (e.g. plant_001)',
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: _saveDeviceId,
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                    );
-                  },
-                  child: const Text('ENTER CODE'),
+                  onPressed: _validateAndSaveDeviceId,
+                  child: const Text('CONNECT'),
                 ),
               ),
             ],
@@ -168,18 +189,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (v) => setState(() => autoWatering = v),
             ),
             const SizedBox(height: 8),
-            DropdownButton<String>(
-              value: selectedVegetable,
-              isExpanded: true,
-              items:
-                  ["Vegetable list", "Lettuce", "Tomato", "Spinach"]
-                      .map(
-                        (item) =>
-                            DropdownMenuItem(value: item, child: Text(item)),
-                      )
-                      .toList(),
-              onChanged: (value) => setState(() => selectedVegetable = value!),
+
+            // Centered Dropdown
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                width: 150,
+                child: DropdownButton<String>(
+                  value: selectedVegetable,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  items:
+                      ["Vegetable list", "Lettuce", "Tomato", "Spinach"]
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item,
+                              child: Text(item),
+                            ),
+                          )
+                          .toList(),
+                  onChanged:
+                      (value) => setState(() => selectedVegetable = value!),
+                ),
+              ),
             ),
+
             const SizedBox(height: 20),
             SwitchListTile(
               title: const Text(
@@ -329,7 +375,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 8),
-            // ✅ Connection status
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -368,8 +413,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-
-      // ✅ Veggie Library Button
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
         child: const Icon(Icons.local_florist),
