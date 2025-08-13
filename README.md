@@ -1,12 +1,13 @@
 # sensors
 
-A new Flutter project.
+ASHLEY AND EJHAY
 
-## Getting Started
+assets/images and veggielibrary.dart lang gagalawin nyo jan ah
 
-This project is a starting point for a Flutter application.
+yung mga pictures ilagay nyo sa assets/images
+para ma call out nyo yung images 
+example: assets/images/lettuce.jpg
 
-A few resources to get you started if this is your first Flutter project:
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
